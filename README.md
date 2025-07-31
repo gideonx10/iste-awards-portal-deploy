@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🏆 ISTE Awards Portal – Revamped
 
-## Getting Started
+A modern, secure, and efficient web portal to manage ISTE Awards submissions and admin evaluations. Built with Next.js 15 (App Router), Supabase, Cloudinary, and NextAuth.js.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🧑‍💻 For Award Applicants:
+- 🔐 Secure Sign-up / Sign-in (Life Membership No. + Email verification)
+- 📄 16 award-specific dynamic forms with validations
+- 📤 Upload documents (PDFs, Certificates) to Cloudinary
+- 📎 Auto-generated Registration Slip (PDF format)
+- ✉️ Email confirmation of submission with attached slip
+- 🔁 Prevent duplicate entries via unique Email/Life Membership No.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 👩‍💼 For ISTE Admins:
+- 🔐 Dedicated Admin Login via `/admin/login` (restricted access)
+- 🖥️ Admin Dashboard to:
+  - View and filter all submissions
+  - Preview uploaded PDFs
+  - Print or export submission slips
+  - Perform CRUD operations on submissions
+  - Export data in CSV/Excel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+| Area                 | Tech / Library                      |
+|----------------------|--------------------------------------|
+| Frontend Framework   | [Next.js 15](https://nextjs.org/) (App Router) |
+| Language             | JavaScript                          |
+| Forms & State        | React `useState` / `useEffect`      |
+| Authentication       | [NextAuth.js](https://next-auth.js.org/) |
+| Database             | [Supabase](https://supabase.com/)   |
+| File Storage         | [Cloudinary](https://cloudinary.com/) |
+| PDF Generation       | [`pdf-lib`](https://pdf-lib.js.org/) (or jsPDF later) |
+| Email Service        | [EmailJS](https://www.emailjs.com/) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔐 User Roles & Authentication Flow
 
-## Deploy on Vercel
+### 1. Applicant
+- Sign-up with:
+  - Life Membership Number
+  - Email (with verification)
+  - Password & Confirm Password
+- Role: `user`
+- Access: `/dashboard` to fill and submit award forms
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Admin
+- Dedicated route: `/admin/login`
+- Role: `admin` (defined via Supabase role field)
+- Access: `/admin` dashboard with restricted features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+## 🔃 Functional Workflow
+
+### Applicant Side:
+1. Registers → Verifies Email
+2. Logs in → Sees dashboard
+3. Fills specific award form
+4. Uploads required documents
+5. Submits → PDF slip is generated & emailed
+6. Cannot resubmit using same email/Life Membership No.
+
+### Admin Side:
+1. Logs into `/admin/login`
+2. Accesses dashboard
+3. Filters, views, and manages submissions
+4. Downloads PDFs / CSV / slips
+5. Edits or deletes if needed
+
+Maintained by [ISTE Gujarat Web Team]
+
+For queries, contact: `support@iste.org.in`
