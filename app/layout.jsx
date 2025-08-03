@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 import SupabaseSessionProvider from '@/components/SessionProvider';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import './globals.css'; // make sure this exists if using Tailwind
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
