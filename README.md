@@ -1,4 +1,4 @@
-# 🏆 ISTE Awards Portal – Revamped
+# 🏆 ISTE Awards Portal
 
 A modern, secure, and efficient web portal to manage ISTE Awards submissions and admin evaluations. Built with Next.js 15 (App Router), Supabase, Cloudinary, and NextAuth.js.
 
