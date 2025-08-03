@@ -14,6 +14,7 @@ export default function SignupPage() {
   const handleSignup = async (e) => {
     e.preventDefault()
 
+    // 1. Validate membership number
     const { data, error: checkError } = await supabase
       .from('membership_numbers')
       .select('*')
@@ -24,25 +25,62 @@ export default function SignupPage() {
       return
     }
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    // 2. Sign up user in Supabase Auth
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     })
 
     if (signUpError) {
       setError(signUpError.message)
-    } else {
-      router.push('/login')
+      return
     }
+
+    // 3. Insert into users table
+    const userId = signUpData.user?.id
+
+    if (userId) {
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert([
+          {
+            id: userId,
+            email: email,
+            membership_number: membershipNumber,
+          },
+        ])
+
+      if (insertError) {
+        console.error('Error inserting into users table:', insertError)
+      }
+    }
+
+    // 4. Redirect
+    router.push('/login')
   }
 
   return (
     <div>
       <h1>Sign Up</h1>
       <form onSubmit={handleSignup}>
-        <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} required />
-        <input type="text" placeholder="Membership Number" onChange={(e) => setMembershipNumber(e.target.value)} required />
+        <input
+          type="email"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Membership Number"
+          onChange={(e) => setMembershipNumber(e.target.value)}
+          required
+        />
         <button type="submit">Sign Up</button>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
