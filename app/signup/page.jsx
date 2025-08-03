@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
@@ -9,6 +9,9 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [membershipNumber, setMembershipNumber] = useState('')
   const [error, setError] = useState('')
+  const [signedUp, setSignedUp] = useState(false)
+  const [intervalId, setIntervalId] = useState(null)
+
   const router = useRouter()
 
   const handleSignup = async (e) => {
@@ -33,56 +36,43 @@ export default function SignupPage() {
 
     if (signUpError) {
       setError(signUpError.message)
+    } else {
+      setSignedUp(true)
+      const id = setInterval(checkEmailVerification, 5000)
+      setIntervalId(id)
+    }
+  }
+
+  const checkEmailVerification = async () => {
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    if (error) {
+      console.log('Error fetching user:', error.message)
       return
     }
 
-    // 3. Insert into users table
-    const userId = signUpData.user?.id
-
-    if (userId) {
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: userId,
-            email: email,
-            membership_number: membershipNumber,
-          },
-        ])
-
-      if (insertError) {
-        console.error('Error inserting into users table:', insertError)
-      }
+    if (user && user.email_confirmed_at) {
+      clearInterval(intervalId)
+      router.push('/login')
     }
-
-    // 4. Redirect
-    router.push('/login')
   }
 
   return (
     <div>
       <h1>Sign Up</h1>
-      <form onSubmit={handleSignup}>
-        <input
-          type="email"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Membership Number"
-          onChange={(e) => setMembershipNumber(e.target.value)}
-          required
-        />
-        <button type="submit">Sign Up</button>
-      </form>
+      {signedUp ? (
+        <div>
+          <p>A verification email has been sent to <strong>{email}</strong>.</p>
+          <p>Please verify your email to continue...</p>
+        </div>
+      ) : (
+        <form onSubmit={handleSignup}>
+          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} required />
+          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} required />
+          <input type="text" placeholder="Membership Number" onChange={(e) => setMembershipNumber(e.target.value)} required />
+          <button type="submit">Sign Up</button>
+        </form>
+      )}
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   )

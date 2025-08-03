@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabaseClient'
+// import PDFUpload from '@/components/PDFUpload'
+import PDFUploadDirect from '@/components/PDFUploadDirect'
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
@@ -27,12 +29,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
       {user && (
         <>
-          <p>Welcome, {user.email}</p>
-          <button onClick={handleSignout}>Sign Out</button>
+          <p className="mb-4">Welcome, {user.email}</p>
+          <button onClick={handleSignout} className="mb-6 px-4 py-2 bg-red-500 text-white rounded">
+            Sign Out
+          </button>
+          {/* <PDFUpload /> */}
+          <PDFUploadDirect />
         </>
       )}
     </div>

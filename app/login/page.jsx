@@ -21,7 +21,7 @@ export default function SigninPage() {
     if (signInError) {
       setError(signInError.message)
     } else {
-      router.push('/dashboard')
+      router.push('/')
     }
   }
 
