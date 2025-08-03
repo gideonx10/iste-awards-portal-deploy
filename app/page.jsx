@@ -15,7 +15,7 @@ export default function HomePage() {
       const { data: { session } } = await supabase.auth.getSession()
 
       if (session) {
-        router.push('/dashboard')
+        router.push('/')
       } else {
         setSession(null)
         setIsLoading(false)
@@ -25,7 +25,7 @@ export default function HomePage() {
     checkSession()
   }, [])
 
-  if (isLoading) return <p>Loading...</p>
+  // if (isLoading) return <p>Loading...</p>
 
   return <Landing />
 }
