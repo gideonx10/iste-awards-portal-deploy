@@ -1,90 +1,192 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [membershipNumber, setMembershipNumber] = useState('')
-  const [error, setError] = useState('')
+  const pathname = usePathname()
+  const isAdmin = pathname.includes('/admin')
+  const role = isAdmin ? 'admin' : 'user'
 
-  const router = useRouter()
+  const [formData, setFormData] = useState({
+    email: '',
+    membership_no: '',
+    password: '',
+    confirmPassword: '',
+  })
+
+  const [otpSent, setOtpSent] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [otpVerified, setOtpVerified] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const sendOtp = async () => {
+    const { email, membership_no } = formData
+    if (!email || !membership_no) return toast.error('Email and Membership No required!')
+
+    setLoading(true)
+
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, membership_no }),
+    })
+
+    const data = await res.json()
+    setLoading(false)
+
+    if (data.success) {
+      toast.success('OTP sent successfully!')
+      setOtpSent(true)
+    } else {
+      toast.error(data.error || 'Failed to send OTP.')
+    }
+  }
+
+  const verifyOtp = async () => {
+    if (!otp) return toast.error('Enter OTP first.')
+
+    setLoading(true)
+    const res = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email, otp }),
+    })
+
+    const data = await res.json()
+    setLoading(false)
+
+    if (data.success) {
+      toast.success('OTP verified!')
+      setOtpVerified(true)
+    } else {
+      toast.error(data.error || 'OTP verification failed.')
+    }
+  }
 
   const handleSignup = async (e) => {
     e.preventDefault()
 
-    // 1. Validate membership number
-    const { data, error: checkError } = await supabase
-      .from('membership_numbers')
-      .select('*')
-      .eq('membership_number', membershipNumber)
+    const { email, membership_no, password, confirmPassword } = formData
 
-    if (checkError || data.length === 0) {
-      setError('Invalid membership number.')
-      return
-    }
+    if (!otpVerified) return toast.error('Verify your email with OTP first!')
+    if (!email || !membership_no || !password || !confirmPassword)
+      return toast.error('All fields are required.')
+    if (password !== confirmPassword) return toast.error('Passwords do not match.')
 
-    // 2. Sign up user in Supabase Auth (no email verification step)
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
+    setLoading(true)
+
+    const res = await fetch('/api/register-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, membership_no, password, role }),
     })
 
-    if (signUpError) {
-      setError(signUpError.message)
-      return
+    const data = await res.json()
+    setLoading(false)
+
+    if (data.success) {
+      toast.success('Registered successfully!')
+      setFormData({ email: '', membership_no: '', password: '', confirmPassword: '' })
+      setOtp('')
+      setOtpSent(false)
+      setOtpVerified(false)
+    } else {
+      toast.error(data.error || 'Registration failed.')
     }
-
-    // 3. Insert into users table
-    const userId = signUpData.user?.id
-    if (userId) {
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: userId,
-            email: email,
-            membership_number: membershipNumber,
-            role: 'user', // Default role
-          },
-        ])
-
-      if (insertError) {
-        console.error('Error inserting into users table:', insertError)
-      }
-    }
-
-    // 4. Redirect immediately after successful signup
-    router.push('/login')
   }
 
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSignup}>
+    <div className="max-w-md mx-auto mt-10 px-4 py-6 border rounded-md shadow">
+      <Toaster />
+      <h1 className="text-2xl font-bold mb-4">
+        {isAdmin ? 'Admin' : 'User'} Signup
+      </h1>
+
+      <form onSubmit={handleSignup} className="space-y-4">
         <input
           type="email"
+          name="email"
           placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
           required
         />
         <input
           type="text"
+          name="membership_no"
           placeholder="Membership Number"
-          onChange={(e) => setMembershipNumber(e.target.value)}
+          value={formData.membership_no}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
           required
         />
-        <button type="submit">Sign Up</button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={sendOtp}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            disabled={loading}
+          >
+            {loading ? 'Sending OTP...' : 'Send OTP'}
+          </button>
+
+          {otpSent && !otpVerified && (
+            <>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP"
+                className="p-2 border rounded w-full"
+              />
+              <button
+                type="button"
+                onClick={verifyOtp}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Verify OTP
+              </button>
+            </>
+          )}
+        </div>
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+
+        <button
+          type="submit"
+          className={`w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 ${
+            loading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          disabled={loading}
+        >
+          {loading ? 'Registering...' : 'Register'}
+        </button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   )
 }

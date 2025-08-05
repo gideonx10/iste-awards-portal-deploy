@@ -4,10 +4,10 @@ import Link from 'next/link';
 
 export default function Landing() {
   const awards = [
+    'Best Student Chapter Award',
     'Best Polytechnic Award',
     'Best Engineering College Award',
     'Best Faculty of the Year',
-    'Outstanding Contribution to Technical Education',
     'Lifetime Achievement Award',
   ];
 

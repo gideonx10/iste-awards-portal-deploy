@@ -1,23 +1,20 @@
 'use client'
 
 import { CldUploadWidget } from 'next-cloudinary'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import toast, { Toaster } from 'react-hot-toast'
 
-export default function PDFUpload() {
+export default function PDFUploadDirect() {
+  const { data: session, status } = useSession()
   const [url, setUrl] = useState(null)
   const [userEmail, setUserEmail] = useState(null)
 
   useEffect(() => {
-    const getSessionEmail = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const email = session?.user?.email || null
-      setUserEmail(email)
+    if (status === 'authenticated') {
+      setUserEmail(session.user.email)
     }
-
-    getSessionEmail()
-  }, [])
+  }, [session, status])
 
   const getSafeFolderName = (email) => {
     if (!email) return 'ISTE-Awards-Portal/anonymous'
@@ -26,7 +23,7 @@ export default function PDFUpload() {
 
   return (
     <>
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
@@ -36,9 +33,11 @@ export default function PDFUpload() {
           },
         }}
       />
-      
+
       <div className="p-4 border rounded-md">
-        {userEmail ? (
+        {status === 'loading' && <p className="text-gray-600">Loading user session...</p>}
+
+        {status === 'authenticated' ? (
           <CldUploadWidget
             uploadPreset="pdf_uploads"
             options={{
@@ -48,21 +47,19 @@ export default function PDFUpload() {
               folder: getSafeFolderName(userEmail),
             }}
             onUpload={(result) => {
-              console.log('onUpload fired:', result)
               if (result?.info?.secure_url) {
                 setUrl(result.info.secure_url)
                 toast.success('PDF Uploaded Successfully!')
               }
             }}
             onSuccess={(result) => {
-              console.log('onSuccess fired:', result)
               if (result?.info?.secure_url) {
                 setUrl(result.info.secure_url)
                 toast.success('PDF Uploaded Successfully!')
               }
             }}
             onError={(error) => {
-              console.log('onError fired:', error)
+              console.error('Upload Error:', error)
               toast.error('Upload failed. Please try again.')
             }}
           >
@@ -76,7 +73,7 @@ export default function PDFUpload() {
             )}
           </CldUploadWidget>
         ) : (
-          <p className="text-gray-600">Loading user session...</p>
+          <p className="text-gray-600">Please log in to upload a PDF.</p>
         )}
 
         {url && (
