@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { formConfig } from '@/lib/formConfig'
 import nodemailer from 'nodemailer'
 import axios from 'axios'
+import FormData from 'form-data'
 
 // Main POST handler
 export async function POST(req) {
@@ -15,21 +16,18 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Invalid form key' }, { status: 400 })
     }
 
-    // 1️⃣ Generate Registration Slip PDF
+    // 1️⃣ Generate Registration Slip PDF (Buffer)
     const pdfBuffer = await config.generatePDF(formData, userEmail)
-    const blob = new Blob([pdfBuffer], { type: 'application/pdf' })
 
     const safeEmail = userEmail.replace(/[@.]/g, '_')
     const formName = formKey.replace(/_/g, '-').toLowerCase()
-    const file = new File(
-      [blob],
-      `registration-slip-${safeEmail}-${formName}.pdf`,
-      { type: 'application/pdf' }
-    )
 
-    // 2️⃣ Upload Registration Slip to Cloudinary
+    // 2️⃣ Upload Registration Slip to Cloudinary using form-data (Node.js safe)
     const formDataCloudinary = new FormData()
-    formDataCloudinary.append('file', file)
+    formDataCloudinary.append('file', pdfBuffer, {
+      filename: `registration-slip-${safeEmail}-${formName}.pdf`,
+      contentType: 'application/pdf',
+    })
     formDataCloudinary.append('upload_preset', 'pdf_uploads') // preset from Cloudinary settings
     formDataCloudinary.append('folder', `ISTE-Awards-Portal`)
     formDataCloudinary.append('public_id', `ISTE-Awards-Portal/${safeEmail}/${formName}/registration-slip`)
@@ -39,7 +37,8 @@ export async function POST(req) {
       `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`,
       {
         method: 'POST',
-        body: formDataCloudinary
+        body: formDataCloudinary,
+        headers: formDataCloudinary.getHeaders(), // ✅ Needed for Node fetch
       }
     )
 
@@ -97,8 +96,8 @@ ISTE Team`,
           filename: `registration-slip-${safeEmail}-${formName}.pdf`,
           content: pdfAttachmentBuffer,
           contentType: 'application/pdf',
-        }
-      ]
+        },
+      ],
     })
 
     // 6️⃣ Return success
