@@ -20,7 +20,7 @@ export default function LoginPage() {
 
     if (res.ok && !res.error) {
       toast.success('Login successful!')
-      router.push('/') // or your dashboard
+      router.push('/')
     } else {
       toast.error(res.error || 'Login failed!')
     }
@@ -51,6 +51,17 @@ export default function LoginPage() {
           Login
         </button>
       </form>
+
+      {/* Signup link at the bottom */}
+      <p className="mt-4 text-center text-lg text-gray-600">
+        Don&apos;t have an account?{' '}
+        <span
+          className="text-blue-600 hover:underline cursor-pointer"
+          onClick={() => router.push('/signup')}
+        >
+          Signup Here
+        </span>
+      </p>
     </div>
   )
 }

@@ -1,20 +1,44 @@
-// /api/check-submission/route.js
+// api/check-submission/route.js
 import { supabase } from '@/lib/supabaseClient'
 import { NextResponse } from 'next/server'
 
+/**
+ * GET /api/check-submission?email=<user_email>&form=<table_name>
+ * Checks if the given user has submitted a nomination for the given form/table.
+ */
 export async function GET(req) {
-  const { searchParams } = new URL(req.url)
-  const email = searchParams.get('email')
+  try {
+    const { searchParams } = new URL(req.url)
+    const email = searchParams.get('email')
+    const formTable = searchParams.get('form')
 
-  const { data, error } = await supabase
-    .from('best_chapter_award')
-    .select('registration_slip_url')
-    .eq('user_email', email)
-    .single()
+    if (!email || !formTable) {
+      return NextResponse.json(
+        { error: 'Missing required parameters: email, form' },
+        { status: 400 }
+      )
+    }
 
-  if (data) {
-    return NextResponse.json({ exists: true, registration_slip_url: data.registration_slip_url })
-  } else {
-    return NextResponse.json({ exists: false })
+    const { data, error } = await supabase
+      .from(formTable)
+      .select('registration_slip_url')
+      .eq('user_email', email)
+      .maybeSingle() // safer than .single() if no rows exist
+
+    if (error) {
+      console.error(`Supabase error on table ${formTable}:`, error)
+      return NextResponse.json(
+        { error: 'Database error', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      exists: !!data,
+      registration_slip_url: data?.registration_slip_url || null,
+    })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

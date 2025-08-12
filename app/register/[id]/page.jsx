@@ -2,9 +2,8 @@
 
 import { useParams } from 'next/navigation'
 import BestChapterForm from '@/components/forms/BestChapterForm'
-// import other forms below when ready
-// import BestFacultyForm from '@/components/forms/BestFacultyForm'
-// import OutstandingContributionForm from '@/components/forms/OutstandingContributionForm'
+import BestStudentChapterForm from '@/components/forms/BestStudentChapterForm'
+import BestInnovativeResearcherForm from '@/components/forms/BestInnovativeResearcherForm'
 
 export default function RegisterPage() {
   const { id } = useParams()
@@ -13,10 +12,10 @@ export default function RegisterPage() {
     switch (id) {
       case '0':
         return <BestChapterForm />
-      // case '1':
-      //   return <BestFacultyForm />
-      // case '2':
-      //   return <OutstandingContributionForm />
+      case '1':
+        return <BestStudentChapterForm />
+      case '2':
+        return <BestInnovativeResearcherForm />
       default:
         return (
           <div className="p-8 text-center text-red-500">

@@ -7,13 +7,13 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { formConfig } from '@/lib/formConfig'
 
-export default function BestChapterForm() {
+export default function BestStudentChapterForm() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
   const [formData, setFormData] = useState({
     institute_name: '',
-    address: '',
+    institute_address: '',
     pin: '',
     phone: '',
     email: '',
@@ -32,17 +32,12 @@ export default function BestChapterForm() {
     head_phone: '',
     head_mobile: '',
     head_email: '',
-    chairman_name: '',
-    chairman_designation: '',
-    chairman_phone: '',
-    chairman_mobile: '',
-    chairman_email: '',
-    secretary_name: '',
-    secretary_designation: '',
-    secretary_phone: '',
-    secretary_mobile: '',
-    secretary_email: '',
-    new_lm: '',
+    advisor_name: '',
+    advisor_designation: '',
+    advisor_phone: '',
+    advisor_mobile: '',
+    advisor_email: '',
+    new_student_members: '',
     events_international: '',
     events_national: '',
     events_local: '',
@@ -58,7 +53,7 @@ export default function BestChapterForm() {
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [existingSlipUrl, setExistingSlipUrl] = useState('')
 
-  const formKey = 'best_chapter_award'
+  const formKey = 'best_student_chapter_award'
   const { emailSubject, emailIntro, table } = formConfig[formKey]
 
   useEffect(() => {
@@ -133,7 +128,9 @@ export default function BestChapterForm() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">ISTE Best Chapter Nomination Form</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        ISTE Best Student Chapter Award Nomination Form
+      </h1>
 
       {hasSubmitted ? (
         <div className="p-4 border border-green-400 rounded bg-green-50 text-green-700">

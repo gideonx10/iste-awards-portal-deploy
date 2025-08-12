@@ -4,8 +4,9 @@ import Link from 'next/link';
 
 export default function Landing() {
   const awards = [
+    'Best Chapter Award',
     'Best Student Chapter Award',
-    'Best Polytechnic Award',
+    'Best Innovative Researcher Award',
     'Best Engineering College Award',
     'Best Faculty of the Year',
     'Lifetime Achievement Award',
@@ -38,13 +39,26 @@ export default function Landing() {
 
       {/* How to Apply */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-3" id="how-to-apply">
+        <h2 className="text-2xl font-semibold mb-4" id="how-to-apply">
           How to Apply
         </h2>
-        <p className="text-gray-600">
-          Submit nominations easily through our online portal. Select your award, fill in
-          the required details, and upload necessary documents.
-        </p>
+        <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
+          <li>
+            Submit nominations easily through this online portal.
+          </li>
+          <li>
+            Select the award you want to nominate for and fill in the required details based on the instructions on the individual page.
+          </li>
+          <li>
+            Upload the necessary documents.
+          </li>
+          <li>
+            Once the form is complete, click <strong>Submit</strong> to finalize your nomination.
+          </li>
+          <li>
+            After submission, you will receive a registration slip via email. Keep this slip for future reference.
+          </li>
+        </ol>
       </section>
 
       {/* List of Awards */}
