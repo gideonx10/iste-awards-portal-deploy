@@ -75,7 +75,7 @@ export async function POST(req) {
       port: process.env.SMTP_PORT,
       secure: false,
       auth: {
-        user: process.env.SMTP_USER,
+        user: process.env.SMTP_EMAIL,
         pass: process.env.SMTP_PASS,
       },
     })
